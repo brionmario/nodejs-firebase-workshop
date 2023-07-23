@@ -1,0 +1,26 @@
+{
+  "name": "nodejs-firebase-workshop",
+  "version": "0.1.0",
+  "description": "Sample app used in one of the IDEALIZE 2023 workshops organized by AIESEC in University of Moratuwa",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brionmario/nodejs-firebase-workshop.git"
+  },
+  "keywords": [
+    "nodejs",
+    "workshop",
+    "firebase",
+    "crud",
+    "idealize2023"
+  ],
+  "author": "WSO2",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/brionmario/nodejs-firebase-workshop/issues"
+  },
+  "homepage": "https://github.com/brionmario/nodejs-firebase-workshop#readme"
+}
