@@ -4,6 +4,7 @@
   "description": "Sample app used in one of the IDEALIZE 2023 workshops organized by AIESEC in University of Moratuwa",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon index.js",
     "test": "npm test"
   },
   "repository": {
@@ -25,5 +26,8 @@
   "homepage": "https://github.com/brionmario/nodejs-firebase-workshop#readme",
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
