@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/brionmario/nodejs-firebase-workshop/issues"
   },
-  "homepage": "https://github.com/brionmario/nodejs-firebase-workshop#readme"
+  "homepage": "https://github.com/brionmario/nodejs-firebase-workshop#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
