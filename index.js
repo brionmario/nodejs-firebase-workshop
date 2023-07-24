@@ -1,108 +1,159 @@
-const express = require('express');
+const { default: async } = require("async");
+const express = require("express");
+const { db } = require("./firebase/admin");
 
 const app = express();
 
 const PORT = 3000;
 
-const DB = {
-  SESSIONS: [
-    {
-      "id": 1,
-      "title": "Node.js & Firebase",
-      "description": "Become an expert in CRUD operations",
-      "authors": [
-        {
-          "name": "Brion Silva",
-          "company": "WSO2"
-        },
-        {
-          "name": "Omal Wijegunawardane",
-          "company": "WSO2"
-        }
-      ]
-    },
-    {
-      "id": 2,
-      "title": "Flutter & AppGyver",
-      "description": "Hands on session on Flutter & AppGyver",
-      "authors": [
-        {
-          "name": "Chathuranga Dissanayake",
-          "company": "WSO2"
-        }
-      ]
-    }
-  ]
-}
-
 app.use(express.json());
 
 // Welcome route
-app.get('/api', (req, res) => {
-  res.status(200).send({
-    message: 'Welcome to IDEALIZE 2023 REST API...',
-  });
+app.get("/api", (req, res) => {
+    res.status(200).send({
+        message: "Welcome to IDEALIZE 2023 REST API...",
+    });
 });
 
 // Get all sessions
-app.get('/api/sessions', (req, res) => {
-  res.status(200).json(DB.SESSIONS);
+app.get("/api/sessions", async (req, res) => {
+    const sessionRef = db.collection("sessions");
+
+    sessionRef
+        .get()
+        .then((snapshot) => {
+            const data = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            return res.status(201).json(data);
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                message: "Error while getting sessions.",
+                error: error,
+            });
+        });
 });
 
 // Get specific session
-app.get('/api/sessions/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
+app.get("/api/sessions/:id", (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const sessionRef = db.collection("sessions").where("id", "==", id);
 
-  const session = DB.SESSIONS.find((session) => session.id === id);
+    sessionRef
+        .get()
+        .then((snapshot) => {
+            const data = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
 
-  if (session) {
-    res.status(200).json(session);
-  } else {
-    res.status(404).json({ message: `No session found for the given session id: ${id}.` });
-  }
+            if (data.length === 0) {
+                return res.status(404).json({
+                    message: `No session found for the given session id: ${id}.`,
+                });
+            }
+
+            return res.status(201).json(data);
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                message: "Error while getting session.",
+                error: error,
+            });
+        });
 });
 
 // Add a sessions
-app.post('/api/sessions', (req, res) => {
-  const session = {
-    id: DB.SESSIONS.length + 1,
-    ...req.body
-  };
+app.post("/api/sessions", async (req, res) => {
+    const sessionRef = db.collection("sessions");
+    const snapshot = await sessionRef.count().get();
+    const docId = snapshot.data().count + 1;
 
-  DB.SESSIONS.push(session);
-  res.status(201).json(DB.SESSIONS);
+    const session = {
+        id: docId,
+        ...req.body,
+    };
+
+    sessionRef
+        .doc(docId.toString())
+        .set(session)
+        .then((docRef) => {
+            return res.status(201).json({
+                id: docRef.id,
+                ...session,
+            });
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                message: "Error while adding session.",
+                error: error,
+            });
+        });
 });
 
 // Update a session
-app.put('/api/sessions/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const updatedSession = req.body;
-  const foundIndex = DB.SESSIONS.findIndex((session) => session.id === id);
+app.put("/api/sessions/:id", async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const updatedSession = req.body;
 
-  if (foundIndex !== -1) {
-    DB.SESSIONS.splice(foundIndex, 1, {
-      id,
-      ...updatedSession
-    });
-  
-    res.status(200).json(DB.SESSIONS[foundIndex]);
-  } else {
-    res.status(404).json({ message: `No session found for the given session id: ${id}.`})
-  }
+    const sessionDocRef = db.collection("sessions").doc(id.toString());
+
+        sessionDocRef.get().then((doc) => {
+            if (doc.exists) {
+                sessionDocRef
+                    .update(updatedSession)
+                    .then(() => {
+                        return res.status(201).json({
+                            id: doc.id,
+                            ...updatedSession,
+                        });
+                    })
+                    .catch((error) => {
+                        return res.status(500).json({
+                            message: "Error while updating session.",
+                        });
+                    });
+            } else {
+                return res.status(404).json({
+                    message: `No session found for the given session id: ${id}.`,
+                });
+            }
+        }).catch((error) => {
+          console.log(error);
+            return res.status(500).json({
+                message: "Error while getting the session to update.",
+                error: error
+            });
+        });
 });
 
-app.delete('/api/sessions/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const foundIndex = DB.SESSIONS.findIndex((session) => session.id === id);
+app.delete("/api/sessions/:id", (req, res) => {
+    const id = parseInt(req.params.id, 10);
 
-  if (foundIndex !== -1) {
-    DB.SESSIONS.splice(foundIndex, 1);
-    res.json({ message: 'Session deleted successfully' });
-  } else {
-    res.status(404).json({ message: `No session found for the given session id: ${id}.`})
-  }
+    const sessionDocRef = db.collection("sessions").doc(id.toString());
+
+    sessionDocRef.get().then((doc) => {
+        if (doc.exists) {
+            sessionDocRef.delete().then(() => {
+                return res.status(201).json({
+                    message: `Session with id ${id} deleted successfully.`,
+                });
+            });
+        } else {
+            return res.status(404).json({
+                message: `No session found for the given session id: ${id}.`,
+            });
+        }
+    }).catch((error) => {
+        return res.status(500).json({
+            message: "Error while getting the session to delete.",
+            error: error
+        });
+    });
 });
 
 app.listen(PORT, () => {
-  console.log(`The server has started on port ${PORT}...`);
+    console.log(`The server has started on port ${PORT}...`);
 });
