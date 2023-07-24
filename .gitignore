@@ -129,5 +129,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# firebase private key
+src/firebase/private-key.json
 # OS Files
 .DS_Store
