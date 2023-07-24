@@ -5,7 +5,7 @@
 ## Table of Contents
 
 - [Installation](#installation-💻)
-- [Configuration](#configuration-⚙️)
+- [Configuration](#configuration-🔮)
 - [Usage](#usage-🛠️)
 - [API Endpoints](#api-endpoints-🚀)
 - [Middleware](#middleware-⚙️)
@@ -18,7 +18,7 @@
 2. Navigate to the project directory.
 3. Install the required dependencies using `npm install`.
 
-## Configuration ⚙️
+## Configuration 🔮
 
 1. Open http://firebase.google.com and Go to console.
 2. Create a new project.
