@@ -130,6 +130,6 @@ dist
 .pnp.*
 
 # firebase private key
-firebase/private-key.json
+src/firebase/private-key.json
 # OS Files
 .DS_Store

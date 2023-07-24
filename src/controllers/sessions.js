@@ -1,4 +1,4 @@
-const DB = require('../db');
+const { db } = require("../firebase/admin");
 
 /**
  * Get all the sessions.
@@ -6,7 +6,23 @@ const DB = require('../db');
  * @param {*} res - Response object.
  */
 const getSessions = (req, res) => {
-  res.status(200).json(DB.SESSIONS);
+    const sessionRef = db.collection("sessions");
+
+    sessionRef
+        .get()
+        .then((snapshot) => {
+            const data = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            return res.status(201).json(data);
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                message: "Error while getting sessions.",
+                error: error,
+            });
+        });
 };
 
 /**
@@ -15,14 +31,31 @@ const getSessions = (req, res) => {
  * @param {*} res - Response object.
  */
 const getSession = (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const session = DB.SESSIONS.find(session => session.id === id);
+    const id = parseInt(req.params.id, 10);
+    const sessionRef = db.collection("sessions").where("id", "==", id);
 
-  if (session) {
-    res.status(200).json(session);
-  } else {
-    res.status(404).json({ message: `No session found for the given session id: ${id}.` });
-  }
+    sessionRef
+        .get()
+        .then((snapshot) => {
+            const data = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            if (data.length === 0) {
+                return res.status(404).json({
+                    message: `No session found for the given session id: ${id}.`,
+                });
+            }
+
+            return res.status(201).json(data);
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                message: "Error while getting session.",
+                error: error,
+            });
+        });
 };
 
 /**
@@ -30,15 +63,31 @@ const getSession = (req, res) => {
  * @param {*} req - Request object.
  * @param {*} res - Response object.
  */
-const createSession = (req, res) => {
-  const session = {
-    id: DB.SESSIONS.length + 1,
-    ...req.body
-  };
+const createSession = async (req, res) => {
+    const sessionRef = db.collection("sessions");
+    const snapshot = await sessionRef.count().get();
+    const docId = snapshot.data().count + 1;
 
-  DB.SESSIONS.push(session);
+    const session = {
+        id: docId,
+        ...req.body,
+    };
 
-  res.status(201).json(session);
+    sessionRef
+        .doc(docId.toString())
+        .set(session)
+        .then((docRef) => {
+            return res.status(201).json({
+                id: docRef.id,
+                ...session,
+            });
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                message: "Error while adding session.",
+                error: error,
+            });
+        });
 };
 
 /**
@@ -47,20 +96,41 @@ const createSession = (req, res) => {
  * @param {*} res - Response object.
  */
 const updateSession = (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const toUpdate = {
-    id,
-    ...req.body
-  };
-  const foundIndex = DB.SESSIONS.findIndex(session => session.id === id);
+    const id = parseInt(req.params.id, 10);
+    const updatedSession = req.body;
 
-  if (foundIndex !== -1) {
-    DB.SESSIONS.splice(foundIndex, 1, toUpdate);
-  
-    res.status(200).json(DB.SESSIONS[foundIndex]);
-  } else {
-    res.status(404).json({ message: `No session found for the given session id: ${id}.`})
-  }
+    const sessionDocRef = db.collection("sessions").doc(id.toString());
+
+    sessionDocRef
+        .get()
+        .then((doc) => {
+            if (doc.exists) {
+                sessionDocRef
+                    .update(updatedSession)
+                    .then(() => {
+                        return res.status(201).json({
+                            id: doc.id,
+                            ...updatedSession,
+                        });
+                    })
+                    .catch((error) => {
+                        return res.status(500).json({
+                            message: "Error while updating session.",
+                        });
+                    });
+            } else {
+                return res.status(404).json({
+                    message: `No session found for the given session id: ${id}.`,
+                });
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+            return res.status(500).json({
+                message: "Error while getting the session to update.",
+                error: error,
+            });
+        });
 };
 
 /**
@@ -69,22 +139,37 @@ const updateSession = (req, res) => {
  * @param {*} res - Response object.
  */
 const deleteSession = (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const foundIndex = DB.SESSIONS.findIndex(session => session.id === id);
+    const id = parseInt(req.params.id, 10);
 
-  if (foundIndex !== -1) {
-    DB.SESSIONS.splice(foundIndex, 1);
+    const sessionDocRef = db.collection("sessions").doc(id.toString());
 
-    res.sendStatus(204);
-  } else {
-    res.status(404).json({ message: `No session found for the given session id: ${id}.`})
-  }
+    sessionDocRef
+        .get()
+        .then((doc) => {
+            if (doc.exists) {
+                sessionDocRef.delete().then(() => {
+                    return res.status(201).json({
+                        message: `Session with id ${id} deleted successfully.`,
+                    });
+                });
+            } else {
+                return res.status(404).json({
+                    message: `No session found for the given session id: ${id}.`,
+                });
+            }
+        })
+        .catch((error) => {
+            return res.status(500).json({
+                message: "Error while getting the session to delete.",
+                error: error,
+            });
+        });
 };
 
 module.exports = {
-  getSessions,
-  getSession,
-  createSession,
-  updateSession,
-  deleteSession
+    getSessions,
+    getSession,
+    createSession,
+    updateSession,
+    deleteSession,
 };
