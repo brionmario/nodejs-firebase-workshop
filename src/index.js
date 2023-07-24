@@ -1,6 +1,6 @@
 const express = require('express');
-const { getSessions, getSession, createSession, updateSession, deleteSession } = require('./controllers/sessions');
-const { getAuthors, getAuthor, createAuthor, updateAuthor, deleteAuthor } = require('./controllers/authors');
+const sessionsRouter = require('./routes/sessions');
+const authorsRouter = require('./routes/authors');
 
 const app = express();
 
@@ -17,18 +17,10 @@ app.get('/', (req, res) => {
 });
 
 // Sessions.
-app.get('/sessions', getSessions);
-app.get('/sessions/:id', getSession);
-app.post('/sessions', createSession);
-app.put('/sessions/:id', updateSession);
-app.delete('/sessions/:id', deleteSession);
+app.use('/sessions', sessionsRouter);
 
 // Authors.
-app.get('/authors', getAuthors);
-app.get('/authors/:id', getAuthor);
-app.post('/authors', createAuthor);
-app.put('/authors/:id', updateAuthor);
-app.delete('/authors/:id', deleteAuthor);
+app.use('/authors', authorsRouter);
 
 app.listen(PORT, () => {
   console.log(`The server has started on port ${PORT}...`);
