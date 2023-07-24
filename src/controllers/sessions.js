@@ -1,4 +1,4 @@
-const DB = require('../db');
+const db = require('../db.json');
 
 /**
  * Get all the sessions.
@@ -6,7 +6,7 @@ const DB = require('../db');
  * @param {*} res - Response object.
  */
 const getSessions = (req, res) => {
-  res.status(200).json(DB.SESSIONS);
+  res.status(200).json(db.sessions);
 };
 
 /**
@@ -16,7 +16,7 @@ const getSessions = (req, res) => {
  */
 const getSession = (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const session = DB.SESSIONS.find(session => session.id === id);
+  const session = db.sessions.find(session => session.id === id);
 
   if (session) {
     res.status(200).json(session);
@@ -32,11 +32,11 @@ const getSession = (req, res) => {
  */
 const createSession = (req, res) => {
   const session = {
-    id: DB.SESSIONS.length + 1,
+    id: db.sessions.length + 1,
     ...req.body
   };
 
-  DB.SESSIONS.push(session);
+  db.sessions.push(session);
 
   res.status(201).json(session);
 };
@@ -52,12 +52,12 @@ const updateSession = (req, res) => {
     id,
     ...req.body
   };
-  const foundIndex = DB.SESSIONS.findIndex(session => session.id === id);
+  const foundIndex = db.sessions.findIndex(session => session.id === id);
 
   if (foundIndex !== -1) {
-    DB.SESSIONS.splice(foundIndex, 1, toUpdate);
+    db.sessions.splice(foundIndex, 1, toUpdate);
   
-    res.status(200).json(DB.SESSIONS[foundIndex]);
+    res.status(200).json(db.sessions[foundIndex]);
   } else {
     res.status(404).json({ message: `No session found for the given session id: ${id}.`})
   }
@@ -70,10 +70,10 @@ const updateSession = (req, res) => {
  */
 const deleteSession = (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const foundIndex = DB.SESSIONS.findIndex(session => session.id === id);
+  const foundIndex = db.sessions.findIndex(session => session.id === id);
 
   if (foundIndex !== -1) {
-    DB.SESSIONS.splice(foundIndex, 1);
+    db.sessions.splice(foundIndex, 1);
 
     res.sendStatus(204);
   } else {
