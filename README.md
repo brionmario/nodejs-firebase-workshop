@@ -5,6 +5,7 @@
 ## Table of Contents
 
 - [Installation](#installation-💻)
+- [Configuration](#configuration-⚙️)
 - [Usage](#usage-🛠️)
 - [API Endpoints](#api-endpoints-🚀)
 - [Middleware](#middleware-⚙️)
@@ -16,6 +17,22 @@
 1. Clone this repository to your local machine.
 2. Navigate to the project directory.
 3. Install the required dependencies using `npm install`.
+
+## Configuration ⚙️
+
+1. Open http://firebase.google.com and Go to console.
+2. Create a new project.
+3. Select **Web** to add your web app.
+4. Copy the Firebase configuration and add it to the `.env` file at the root of your project.
+```bash
+apiKey="xxxx",
+authDomain="xxxx",
+projectId="xxxx",
+storageBucket="xxxx",
+messagingSenderId="xxxx",
+appId="xxxx"
+```
+5. Go to your `Project settings` -> `Service accounts` and select `Node.js`. Generate new **private key** and add the json file in the in `src/firebase` folder and rename it to `private-key.json`. 
 
 ## Usage 🛠️
 
