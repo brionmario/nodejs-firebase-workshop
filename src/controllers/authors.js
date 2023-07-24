@@ -1,4 +1,4 @@
-const DB = require('../db');
+const db = require('../db.json');
 
 /**
  * Get all authors.
@@ -6,7 +6,7 @@ const DB = require('../db');
  * @param {*} res - Response object.
  */
 const getAuthors = (req, res) => {
-  res.status(200).json(DB.AUTHORS);
+  res.status(200).json(db.authors);
 };
 
 /**
@@ -16,7 +16,7 @@ const getAuthors = (req, res) => {
  */
 const getAuthor = (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const author = DB.AUTHORS.find(author => author.id === id);
+  const author = db.authors.find(author => author.id === id);
 
   if (author) {
     res.status(200).json(author);
@@ -32,11 +32,11 @@ const getAuthor = (req, res) => {
  */
 const createAuthor = (req, res) => {
   const author = {
-    id: DB.AUTHORS.length + 1,
+    id: db.authors.length + 1,
     ...req.body
   };
 
-  DB.AUTHORS.push(author);
+  db.authors.push(author);
 
   res.status(201).json(author);
 };
@@ -52,12 +52,12 @@ const updateAuthor = (req, res) => {
     id,
     ...req.body
   };
-  const foundIndex = DB.AUTHORS.findIndex(author => author.id === id);
+  const foundIndex = db.authors.findIndex(author => author.id === id);
 
   if (foundIndex !== -1) {
-    DB.AUTHORS.splice(foundIndex, 1, toUpdate);
+    db.authors.splice(foundIndex, 1, toUpdate);
 
-    res.status(200).json(DB.AUTHORS[foundIndex]);
+    res.status(200).json(db.authors[foundIndex]);
   } else {
     res.status(404).json({ message: `No author found for the given author id: ${id}.`})
   }
@@ -70,10 +70,10 @@ const updateAuthor = (req, res) => {
  */
 const deleteAuthor = (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const foundIndex = DB.AUTHORS.findIndex(author => author.id === id);
+  const foundIndex = db.authors.findIndex(author => author.id === id);
 
   if (foundIndex !== -1) {
-    DB.AUTHORS.splice(foundIndex, 1);
+    db.authors.splice(foundIndex, 1);
 
     res.sendStatus(204);
   } else {

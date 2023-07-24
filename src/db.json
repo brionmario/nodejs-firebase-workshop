@@ -1,5 +1,5 @@
-const DB = {
-  AUTHORS: [
+{
+  "authors": [
     {
       "id": 1,
       "name": "Brion Silva",
@@ -16,7 +16,7 @@ const DB = {
       "company": "WSO2"
     }
   ],
-  SESSIONS: [
+  "sessions": [
     {
       "id": 1,
       "title": "Node.js & Firebase",
@@ -48,5 +48,3 @@ const DB = {
     }
   ]
 }
-
-module.exports = DB;
